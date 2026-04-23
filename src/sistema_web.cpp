@@ -1,4 +1,5 @@
 #include "sistema_web.h"
+#include "sistema_psicrometrico.h"
 #include <LittleFS.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
@@ -100,7 +101,7 @@ namespace SistemaWeb {
     }
 
     void inicializar() {
-        Serial.println("\nConfigurando Sistema Web ...");
+        Serial.println("Configurando Sistema Web ...");
         
         initTimeZone(); // Iniciamos el reloj
 
@@ -136,5 +137,58 @@ namespace SistemaWeb {
         // Limpia a los clientes que se hayan desconectado abruptamente (ej: cerraron el navegador)
         // Esto evita que la memoria RAM se llene de conexiones fantasma
         ws.cleanupClients();
+    }
+
+    // Función para obtener la hora formateada
+    void getTimestamp(char *buffer, size_t size) {
+        time_t now;
+        time(&now);
+        struct tm timeinfo;
+        localtime_r(&now, &timeinfo);
+
+        int year = timeinfo.tm_year + 1900;
+        
+        // Si el año es menor a 2020, significa que arrancamos en 1969 
+        // y el usuario aún no presionó el botón "Guardar" en la web.
+        if (year < 2020) {
+            snprintf(buffer, size, "Esperando sync...");
+        } else {
+            snprintf(buffer, size, "%02d/%02d/%04d %02d:%02d",
+                     timeinfo.tm_mday, timeinfo.tm_mon + 1, year,
+                     timeinfo.tm_hour, timeinfo.tm_min);
+        }
+    }
+
+    // Envio de los datos a la web
+    void emitirTelemetria() {
+        // Si nadie está mirando la página web:
+        // cortamos la función para no gastar RAM armando un JSON inútil.
+        if (ws.count() == 0) return; 
+
+        // Buscamos los datos del módulo de psicrometro
+        SistemaPsicrometrico::DatosSensores datos = SistemaPsicrometrico::getUltimosDatos();
+        
+        // Armamos el JSON
+        JsonDocument doc;
+
+        // Empaquetamos Datos Externos (Solo si el sensor no está desconectado)
+        // Usamos > -100 porque si falla, la librería devuelve -127.0
+        if (datos.tbs > -100.0) doc["tbs"] = datos.tbs;
+        if (datos.tbh > -100.0) doc["tbh"] = datos.tbh;
+        if (datos.humedad != 255) doc["humedad"] = datos.humedad;
+
+        // Empaquetamos Datos Internos (Solo si no son NaN)
+        if (!isnan(datos.tempDHT)) doc["tempDHT"] = datos.tempDHT;
+        if (!isnan(datos.humDHT)) doc["humDHT"] = datos.humDHT;
+
+        // Empaquetamos la Hora Actual
+        char timestamp[25];
+        getTimestamp(timestamp, sizeof(timestamp));
+        doc["fechayhora"] = timestamp;
+
+        // Convertimos a texto y disparamos por el túnel a todos los conectados
+        String jsonString;
+        serializeJson(doc, jsonString);
+        ws.textAll(jsonString);
     }
 }

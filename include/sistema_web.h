@@ -7,4 +7,7 @@ namespace SistemaWeb {
     
     // Para los WebSockets
     void actualizar(); 
+
+    // Para enviar los datos a la página
+    void emitirTelemetria();
 }

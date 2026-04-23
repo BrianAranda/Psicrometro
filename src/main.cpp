@@ -19,6 +19,7 @@ void loop() {
   if (tActual - tAnterior >= intervalo) {
     tAnterior = tActual;
     SistemaPsicrometrico::actualizar();
+    SistemaWeb::emitirTelemetria();
   }
 
   // Cuando se implemente el sistema web se llamaría a SistemaPsicrometrico::getUltimosDatos()
