@@ -10,4 +10,7 @@ namespace SistemaWeb {
 
     // Para enviar los datos a la página
     void emitirTelemetria();
+
+    // Para el Datalogger (guardar los datos)
+    void registrarMuestra();
 }

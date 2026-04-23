@@ -14,6 +14,22 @@ namespace SistemaWeb {
     // Creamos el objeto WebSocket
     AsyncWebSocket ws("/ws"); 
 
+    // Variables del Datalogger
+    const int muestras_max = 720;
+    
+    struct RegistroMet {
+        char timestamp[20];
+        float tbs;
+        float tbh;
+        uint8_t humedad;
+        float tempDHT;
+        float humDHT;
+    };
+
+    RegistroMet historial[muestras_max];
+    int indiceHistorial = 0;
+    int cantidadMuestras = 0;
+
     // Funciones para el RTC
     void initTimeZone(){
         setenv("TZ", "ART3", 1);  // Configuración para Argentina UTC-3
@@ -126,6 +142,33 @@ namespace SistemaWeb {
         ws.onEvent(onEvent);
         server.addHandler(&ws);
 
+        // Ruta para descargar el csv
+        server.on("/download.csv", HTTP_GET, [](AsyncWebServerRequest *request) {
+            // Usamos un "Stream" para enviar el archivo línea por línea y no explotar la RAM
+            AsyncResponseStream *response = request->beginResponseStream("text/csv");
+            response->addHeader("Content-Disposition", "attachment; filename=\"psicrometro_datalogger.csv\"");
+            
+            // Imprimimos la cabecera del CSV
+            response->print("Fecha_Hora,TBS(C),TBH(C),HR(%),Temp_Int(C),Hum_Int(%)\n");
+            
+            // Calculamos desde dónde empezar a leer (por si el buffer dio la vuelta completa)
+            int inicio = (cantidadMuestras < muestras_max) ? 0 : indiceHistorial;
+            
+            // Imprimimos las filas
+            for (int i = 0; i < cantidadMuestras; i++) {
+                int pos = (inicio + i) % muestras_max;
+                response->printf("%s,%.1f,%.1f,%d,%.1f,%.0f\n", 
+                    historial[pos].timestamp,
+                    historial[pos].tbs,
+                    historial[pos].tbh,
+                    historial[pos].humedad,
+                    historial[pos].tempDHT,
+                    historial[pos].humDHT
+                );
+            }
+            request->send(response);
+        });
+
         // Encendemos el servidor
         server.begin();
         Serial.println("Servidor Web Asíncrono iniciado. Escuchando peticiones...");
@@ -186,9 +229,38 @@ namespace SistemaWeb {
         getTimestamp(timestamp, sizeof(timestamp));
         doc["fechayhora"] = timestamp;
 
+        doc["progreso"] = cantidadMuestras; // Le avisa a la barra verde cuánto se ha llenado
+
         // Convertimos a texto y disparamos por el túnel a todos los conectados
         String jsonString;
         serializeJson(doc, jsonString);
         ws.textAll(jsonString);
+    }
+
+    // Función de registro del Datalogger
+    void registrarMuestra() {
+        char timestampActual[25];
+        getTimestamp(timestampActual, sizeof(timestampActual));
+
+        // No guardamos en el historial hasta haber seteado una hora exacta manualmente
+        if (String(timestampActual) == "Esperando sync...") {
+            return; 
+        }
+
+        SistemaPsicrometrico::DatosSensores datos = SistemaPsicrometrico::getUltimosDatos();
+
+        // Llenamos el bloque de memoria actual
+        strlcpy(historial[indiceHistorial].timestamp, timestampActual, sizeof(historial[indiceHistorial].timestamp));
+        historial[indiceHistorial].tbs = datos.tbs;
+        historial[indiceHistorial].tbh = datos.tbh;
+        historial[indiceHistorial].humedad = datos.humedad;
+        historial[indiceHistorial].tempDHT = datos.tempDHT;
+        historial[indiceHistorial].humDHT = datos.humDHT;
+
+        // Avanzamos el índice (Buffer circular: vuelve a cero al llegar a 720)
+        indiceHistorial = (indiceHistorial + 1) % muestras_max;
+        if (cantidadMuestras < muestras_max) {
+            cantidadMuestras++;
+        }
     }
 }
