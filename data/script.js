@@ -11,7 +11,7 @@ function initWebSocket() {
     console.log('Iniciando conexión WebSocket...');
     websocket = new WebSocket(gateway);
     websocket.onopen = onOpen;
-    websocket.onclose = onClose;
+    websocket.onclose = onClose;    
     websocket.onmessage = onMessage;
 }
 

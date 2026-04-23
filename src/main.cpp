@@ -22,5 +22,5 @@ void loop() {
   }
 
   // Cuando se implemente el sistema web se llamaría a SistemaPsicrometrico::getUltimosDatos()
-  SistemaWeb::actualizar();   // Ahora no hace nada
+  SistemaWeb::actualizar();   
 }
