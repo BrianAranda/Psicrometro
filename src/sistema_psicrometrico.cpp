@@ -81,14 +81,9 @@ namespace SistemaPsicrometrico {
     // Actualiza la lectura de los datos, o sea lo que pasaría en el loop xd
     void actualizar() {
         
-        // Soy un boludo y rompi un pin
-        // sensors.requestTemperatures();
-        // ultimosDatos.tbs = sensors.getTempC(direccionTBS);
-        // ultimosDatos.tbh = sensors.getTempC(direccionTBH);
-
-        // Como soy un tarado y rompi un pin fuerzo valores
-        ultimosDatos.tbs = 25.0;
-        ultimosDatos.tbh = 20.0;
+        sensors.requestTemperatures();
+        ultimosDatos.tbs = sensors.getTempC(direccionTBS);
+        ultimosDatos.tbh = sensors.getTempC(direccionTBH);
 
         // Esto porque se me desconecto sin querer y salto error 
         if (ultimosDatos.tbs == DEVICE_DISCONNECTED_C || ultimosDatos.tbh == DEVICE_DISCONNECTED_C) {
