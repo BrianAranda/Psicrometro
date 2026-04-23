@@ -16,7 +16,7 @@ namespace SistemaWifi {
     IPAddress subnet(255, 255, 255, 0);     // Mascara de Red, deja espacio para 254 conexiones
 
     void inicializar() {
-        Serial.println("Configurando Access Point ...");
+        Serial.println("\nConfigurando Access Point ...");
 
         // Aplicar la configuración IP y levantar el Access Point
         WiFi.softAPConfig(local_IP, gateway, subnet); 
@@ -27,5 +27,6 @@ namespace SistemaWifi {
         Serial.print("Nombre (SSID): ");    Serial.println(AP_SSID);
         Serial.print("Contraseña: ");       Serial.println(AP_PASS);
         Serial.print("IP del sistema: ");   Serial.println(WiFi.softAPIP());
+        Serial.println("");
     }
 }
