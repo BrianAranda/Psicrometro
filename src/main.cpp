@@ -1,18 +1,21 @@
 #include <Arduino.h>
+#include "sistema_psicrometrico.h"
 
-// put function declarations here:
-int myFunction(int, int);
+unsigned long tAnterior = 0;
+const long intervalo = 5000;    // Como esta en milisegundos esto es 5 segundos
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200);
+  SistemaPsicrometrico::inicializar();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  unsigned long tActual = millis();
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  if (tActual - tAnterior >= intervalo) {
+    tAnterior = tActual;
+    SistemaPsicrometrico::actualizar();
+  }
+
+  // Cuando se implemente el sistema web se llamaría a SistemaPsicrometrico::getUltimosDatos()
 }
