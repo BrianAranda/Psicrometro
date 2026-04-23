@@ -1,8 +1,9 @@
 #include "sistema_psicrometrico.h"
+#include "tablas_psicrometricas.h"
 #include <LiquidCrystal_I2C.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "tablas_psicrometricas.h"
+#include <DHT.h>
 
 namespace SistemaPsicrometrico {
 
@@ -17,8 +18,12 @@ namespace SistemaPsicrometrico {
     DeviceAddress direccionTBS = { 0x28, 0x3E, 0xF3, 0x7C, 0x00, 0x00, 0x00, 0xB2 }; 
     DeviceAddress direccionTBH = { 0x28, 0xAC, 0x00, 0x7A, 0x00, 0x00, 0x00, 0x8C }; 
 
+    // Configuración del DHT
+    const int dhtPin = 16;
+    DHT dht;
+
     // Valores iniciales por seguridad
-    DatosSensores ultimosDatos = {0.0, 0.0, 255};
+    DatosSensores ultimosDatos = {0.0, 0.0, 255, 0.0, 255};
 
     // Función que devuelve la humedad o 255 si está fuera de rango
     uint8_t calcularHumedad(float tbs, float tbh) {
@@ -73,6 +78,9 @@ namespace SistemaPsicrometrico {
         // Configurar la resolución a 12 bits (máxima precisión: 0.0625°C)
         sensors.setResolution(direccionTBS, 12);
         sensors.setResolution(direccionTBH, 12);
+
+        // Inicializa el DHT 
+        dht.setup(dhtPin);
         
         lcd.setCursor(0, 0);
         lcd.print("Proyecto Embebidos");
@@ -81,33 +89,57 @@ namespace SistemaPsicrometrico {
     // Actualiza la lectura de los datos, o sea lo que pasaría en el loop xd
     void actualizar() {
         
-        // Soy un boludo y rompi un pin
-        // sensors.requestTemperatures();
-        // ultimosDatos.tbs = sensors.getTempC(direccionTBS);
-        // ultimosDatos.tbh = sensors.getTempC(direccionTBH);
+        // Leemos los DS18B20
+        sensors.requestTemperatures();
+        ultimosDatos.tbs = sensors.getTempC(direccionTBS);
+        ultimosDatos.tbh = sensors.getTempC(direccionTBH);
 
-        // Como soy un tarado y rompi un pin fuerzo valores
-        ultimosDatos.tbs = 25.0;
-        ultimosDatos.tbh = 20.0;
+        // Leemos el DHT
+        ultimosDatos.tempDHT = dht.getTemperature();
+        ultimosDatos.humDHT = dht.getHumidity();
 
-        // Esto porque se me desconecto sin querer y salto error 
-        if (ultimosDatos.tbs == DEVICE_DISCONNECTED_C || ultimosDatos.tbh == DEVICE_DISCONNECTED_C) {
+        // Verificaciones de que no este desconectado y muestra
+        if (ultimosDatos.tbs == DEVICE_DISCONNECTED_C) {
             lcd.setCursor(0, 1);
-            lcd.print("Sensor desconectado");
-            return;
+            lcd.print("TBS desconectado");
+        } else {
+            lcd.setCursor(0, 1);
+            lcd.print("TBS: "); 
+            lcd.print(ultimosDatos.tbs, 2); 
+            lcd.print((char)223); 
+            lcd.print("C      ");
         }
-
-        ultimosDatos.humedad = calcularHumedad(ultimosDatos.tbs, ultimosDatos.tbh);
-
-        // Actualización del display
-        lcd.setCursor(0, 1);
-        lcd.print("TBS: "); lcd.print(ultimosDatos.tbs, 2); lcd.print((char)223); lcd.print("C  ");
-        lcd.setCursor(0, 2);
-        lcd.print("TBH: "); lcd.print(ultimosDatos.tbh, 2); lcd.print((char)223); lcd.print("C  ");
-        lcd.setCursor(0, 3);
-        lcd.print("HR: ");
-        if (ultimosDatos.humedad == 255) lcd.print("Fuera de rango");
-        else { lcd.print(ultimosDatos.humedad); lcd.print("%    "); }
+        if (ultimosDatos.tbh == DEVICE_DISCONNECTED_C) {
+            lcd.setCursor(0, 2);
+            lcd.print("TBH desconectado");
+        } else {
+            lcd.setCursor(0, 2);
+            lcd.print("TBH: "); 
+            lcd.print(ultimosDatos.tbh, 2);
+            lcd.print((char)223); 
+            lcd.print("C       ");
+        }
+        if (ultimosDatos.tbs != DEVICE_DISCONNECTED_C && ultimosDatos.tbh != DEVICE_DISCONNECTED_C) {
+            ultimosDatos.humedad = calcularHumedad(ultimosDatos.tbs, ultimosDatos.tbh);
+            lcd.setCursor(0, 3);
+            lcd.print("HR: ");
+            if (ultimosDatos.humedad == 255) 
+                lcd.print("Fuera de rango");
+            else {
+                lcd.print(ultimosDatos.humedad);
+                lcd.print("%    ");
+            }
+        }
+        if (isnan(ultimosDatos.tempDHT) || isnan(ultimosDatos.humDHT)) {
+            lcd.setCursor(0, 0);
+            lcd.print("DHT desconectado");
+            return;
+        } else {
+            lcd.setCursor(0, 0);
+            lcd.print("In ");
+            lcd.print("T:"); lcd.print(ultimosDatos.tempDHT, 2); lcd.print("C ");
+            lcd.print("H:"); lcd.print(ultimosDatos.humDHT, 0); lcd.print("%  ");
+        }
     }
 
     DatosSensores getUltimosDatos() {
