@@ -22,8 +22,18 @@ namespace SistemaPsicrometrico {
     const int dhtPin = 16;
     DHT dht;
 
+    // Medición de la batería
+    // Usamos ADC1 porque sigue funcionando con el WiFi encendido
+    const int pinBateria = 33;
+
+    // Valores de calibración batería
+    const float RATIO_DIVISOR = 4.06;     // provisorio, ajustar en calibración
+    const float BATERIA_LLENA = 13;     // V con la batería cargada    -> 100 %
+    const float BATERIA_VACIA = 8;     // V con la batería descargada -> 0 %
+    const int   MUESTRAS_ADC  = 16;       // Promediado para suavizar el ruido del ADC
+
     // Valores iniciales por seguridad
-    DatosSensores ultimosDatos = {0.0, 0.0, 255, 0.0, 255};
+    DatosSensores ultimosDatos = {0.0, 0.0, 255, 0.0, 255, 0.0, 0};
 
     // Función que devuelve la humedad o 255 si está fuera de rango
     uint8_t calcularHumedad(float tbs, float tbh) {
@@ -79,11 +89,32 @@ namespace SistemaPsicrometrico {
         sensors.setResolution(direccionTBS, 12);
         sensors.setResolution(direccionTBH, 12);
 
-        // Inicializa el DHT 
+        // Inicializa el DHT
         dht.setup(dhtPin);
-        
+
+        // ADC del pin de batería a rango completo (~0 a 3.3 V)
+        analogSetPinAttenuation(pinBateria, ADC_11db);
+
         lcd.setCursor(0, 0);
         lcd.print("Proyecto Embebidos");
+    }
+
+    // Lee el ADC del divisor, promedia varias muestras y devuelve la tensión
+    float leerBateria() {
+        uint32_t acumulado = 0;
+        for (int i = 0; i < MUESTRAS_ADC; i++) {
+            acumulado += analogReadMilliVolts(pinBateria); // mV calibrados en el pin
+        }
+        float mvPin = acumulado / (float)MUESTRAS_ADC;
+        return (mvPin / 1000.0) * RATIO_DIVISOR;           // V reales de la batería
+    }
+
+    // Convierte la tensión de la batería a un porcentaje 0-100.
+    uint8_t porcentajeBateria(float v) {
+        float pct = (v - BATERIA_VACIA) / (BATERIA_LLENA - BATERIA_VACIA) * 100.0;
+        if (pct < 0)   pct = 0;
+        if (pct > 100) pct = 100;
+        return (uint8_t)round(pct);
     }
 
     // Actualiza la lectura de los datos, o sea lo que pasaría en el loop xd
@@ -97,6 +128,10 @@ namespace SistemaPsicrometrico {
         // Leemos el DHT
         ultimosDatos.tempDHT = dht.getTemperature();
         ultimosDatos.humDHT = dht.getHumidity();
+
+        // Leemos el banco de baterías
+        ultimosDatos.bateriaV = leerBateria();
+        ultimosDatos.bateriaPct = porcentajeBateria(ultimosDatos.bateriaV);
 
         // Verificaciones de que no este desconectado y muestra
         if (ultimosDatos.tbs == DEVICE_DISCONNECTED_C) {

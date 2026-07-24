@@ -31,13 +31,15 @@ function onMessage(event) {
         var obj = JSON.parse(event.data);
 
         // 1. Datos Externos (Psicrómetro)
-        if (obj.tbs !== undefined) document.getElementById("val-tbs").innerHTML = obj.tbs.toFixed(1);
-        if (obj.tbh !== undefined) document.getElementById("val-tbh").innerHTML = obj.tbh.toFixed(1);
+        if (obj.tbs !== undefined) document.getElementById("val-tbs").innerHTML = obj.tbs.toFixed(1).replace(".", ",");
+        if (obj.tbh !== undefined) document.getElementById("val-tbh").innerHTML = obj.tbh.toFixed(1).replace(".", ",");
         if (obj.humedad !== undefined) document.getElementById("val-hr").innerHTML = obj.humedad;
 
         // 2. Datos Internos (Gabinete/DHT)
-        if (obj.tempDHT !== undefined) document.getElementById("val-temp-int").innerHTML = obj.tempDHT.toFixed(1);
+        if (obj.tempDHT !== undefined) document.getElementById("val-temp-int").innerHTML = obj.tempDHT.toFixed(1).replace(".", ",");
         if (obj.humDHT !== undefined) document.getElementById("val-hum-int").innerHTML = obj.humDHT.toFixed(0);
+        if (obj.bateriaPct !== undefined) document.getElementById("val-bateria").innerHTML = obj.bateriaPct;
+        if (obj.bateriaV !== undefined) document.getElementById("val-bateria-v").innerHTML = obj.bateriaV.toFixed(1).replace(".", ",");
 
         // 3. Sistema (Fecha y Datalogger)
         if (obj.fechayhora !== undefined) document.getElementById("fechayhora").innerHTML = obj.fechayhora;
@@ -46,7 +48,7 @@ function onMessage(event) {
             var p = obj.progreso;
             var max_samples = 720;
             var percentage = (p / max_samples) * 100;
-            document.getElementById("progresoTexto").innerHTML = p + "/" + max_samples + " (" + percentage.toFixed(1) + "%)";
+            document.getElementById("progresoTexto").innerHTML = p + "/" + max_samples + " (" + percentage.toFixed(1).replace(".", ",") + "%)";
             document.getElementById("progresoBarra").style.width = percentage + "%";
         }
     } catch (e) {

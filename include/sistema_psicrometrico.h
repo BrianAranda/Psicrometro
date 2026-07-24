@@ -11,7 +11,9 @@ namespace SistemaPsicrometrico {
         float tbh;          // Bulbo Húmedo (Exterior)
         uint8_t humedad;    // Humedad Calculada (Exterior)
         float tempDHT;      // Temperatura Interna (DHT)
-        float humDHT;       // Humedad Interna (DHT)  
+        float humDHT;       // Humedad Interna (DHT)
+        float bateriaV;     // Tensión del banco de baterías (V)
+        uint8_t bateriaPct; // Estado de carga estimado (0-100 %)
     };
 
     // Función que inicializa el hardware del display y sensores

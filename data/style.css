@@ -11,6 +11,7 @@
     --accent-green: #10b981;
     --accent-orange: #f97316;
     --accent-yellow: #eab308;
+    --accent-purple: #a855f7;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -80,8 +81,7 @@ body {
 /* Títulos de sección */
 .section-title {
     font-size: 1.1rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
+    color: var(--text-main);
     letter-spacing: 1px;
     margin-top: 1rem;
     margin-bottom: -0.5rem;
@@ -108,10 +108,11 @@ body {
 .indicator-green { border-left-color: var(--accent-green); }
 .indicator-orange { border-left-color: var(--accent-orange); }
 .indicator-yellow { border-left-color: var(--accent-yellow); }
+.indicator-purple { border-left-color: var(--accent-purple); }
 
 .sensor-header {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: 1.1rem;
+    color: var(--text-main);
     font-weight: 600;
 }
 
@@ -123,8 +124,31 @@ body {
 }
 
 .sensor-value .unit {
-    font-size: 1.2rem;
-    color: var(--text-muted);
+    font-size: 1.8rem;
+    color: var(--text-main);
+    margin-left: 0.2rem;
+}
+
+/* Porcentaje y tensión de la batería, uno al lado del otro */
+.battery-readings {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+.battery-readings .sensor-value { margin-top: 0; }
+
+/* Valor secundario (ej: tensión de la batería junto al porcentaje) */
+.sensor-subvalue {
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-family: monospace;
+    color: var(--text-main);
+}
+
+.sensor-subvalue .subunit {
+    font-size: 1.5rem;
+    color: var(--text-main);
     margin-left: 0.2rem;
 }
 
@@ -137,12 +161,12 @@ body {
 }
 
 h3 { font-size: 1.1rem; margin-bottom: 1rem; }
-.helper-text { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.helper-text { color: var(--text-main); font-size: 0.9rem; margin-bottom: 1.5rem; }
 
 /* Formularios y Botones */
 .modern-form { display: flex; gap: 1rem; align-items: flex-end; }
 .input-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
-.input-group label { font-size: 0.85rem; color: var(--text-muted); }
+.input-group label { font-size: 0.85rem; color: var(--text-main); }
 
 input[type="date"], input[type="time"] {
     background: var(--bg-dark);

@@ -14,6 +14,10 @@ namespace SistemaWeb {
     // Creamos el objeto WebSocket
     AsyncWebSocket ws("/ws"); 
 
+    // Mensaje que se muestra (y con el que se compara el candado del datalogger)
+    // mientras el usuario todavía no sincronizó la fecha/hora desde la web.
+    const char* MSG_ESPERANDO = "Esperando ingreso de sincronización";
+
     // Variables del Datalogger
     const int muestras_max = 720;
     
@@ -194,7 +198,7 @@ namespace SistemaWeb {
         // Si el año es menor a 2020, significa que arrancamos en 1969 
         // y el usuario aún no presionó el botón "Guardar" en la web.
         if (year < 2020) {
-            snprintf(buffer, size, "Esperando sync...");
+            snprintf(buffer, size, "%s", MSG_ESPERANDO);
         } else {
             snprintf(buffer, size, "%02d/%02d/%04d %02d:%02d",
                      timeinfo.tm_mday, timeinfo.tm_mon + 1, year,
@@ -224,8 +228,12 @@ namespace SistemaWeb {
         if (!isnan(datos.tempDHT)) doc["tempDHT"] = datos.tempDHT;
         if (!isnan(datos.humDHT)) doc["humDHT"] = datos.humDHT;
 
+        // Empaquetamos el estado del banco de baterías
+        doc["bateriaPct"] = datos.bateriaPct;
+        doc["bateriaV"] = datos.bateriaV;
+
         // Empaquetamos la Hora Actual
-        char timestamp[25];
+        char timestamp[40];
         getTimestamp(timestamp, sizeof(timestamp));
         doc["fechayhora"] = timestamp;
 
@@ -239,12 +247,12 @@ namespace SistemaWeb {
 
     // Función de registro del Datalogger
     void registrarMuestra() {
-        char timestampActual[25];
+        char timestampActual[40];
         getTimestamp(timestampActual, sizeof(timestampActual));
 
         // No guardamos en el historial hasta haber seteado una hora exacta manualmente
-        if (String(timestampActual) == "Esperando sync...") {
-            return; 
+        if (String(timestampActual) == MSG_ESPERANDO) {
+            return;
         }
 
         SistemaPsicrometrico::DatosSensores datos = SistemaPsicrometrico::getUltimosDatos();
