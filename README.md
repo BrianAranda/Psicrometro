@@ -1,4 +1,4 @@
-# Psicrómetro Digital — Medidor y Registrador de Humedad para Producción Experimental de Té
+# Psicrómetro digital
 
 Sistema embebido sobre **ESP32** que mide la humedad relativa ambiente por el método
 psicrométrico (bulbo seco / bulbo húmedo), la registra localmente y la publica en una
@@ -6,7 +6,7 @@ interfaz web servida por el propio equipo, para su uso en la cámara de marchita
 planta experimental de té (ambiente cercano al 100 % de humedad, con cortes frecuentes de
 energía e internet).
 
-Proyecto para promoción de la asignatura **Técnicas Digitales 2 y Sistemas Embebidos** —
+Proyecto para promoción de la asignatura **Técnicas Digitales 2 y Sistemas Embebidos**
 Facultad de Ingeniería, U.Na.M. Autores: **Aranda, Brian Ezequiel** y **Klopsztein, Leonel Agustín**.
 
 ---
@@ -34,7 +34,7 @@ Facultad de Ingeniería, U.Na.M. Autores: **Aranda, Brian Ezequiel** y **Klopszt
 |-----------------------|------------------------------------------|------------------------|
 | DS18B20 (TBS y TBH)   | Bus OneWire compartido (2 sensores)      | GPIO4                  |
 | DHT (interno)         | Temp./humedad del gabinete               | GPIO16                 |
-| LCD I2C 20x4          | Dirección I2C `0x27`                      | SDA GPIO21 / SCL GPIO22|
+| LCD I2C 20x4          | Dirección I2C `0x27`                     | SDA GPIO21 / SCL GPIO22|
 | Batería (divisor)     | ADC1_CH5, divisor resistivo              | GPIO33                 |
 
 - **Placa**: NodeMCU-32S (`board = nodemcu-32s`).
@@ -120,8 +120,8 @@ cambio llegue al equipo.
 
 ### Desde VS Code (PlatformIO)
 1. Panel de PlatformIO → *Project Tasks* → `env:nodemcu-32s` → **Platform**.
-2. **Build Filesystem Image** — genera la imagen con el contenido de `data/`.
-3. **Upload Filesystem Image** — sube esa imagen al ESP32.
+2. **Build Filesystem Image**: genera la imagen con el contenido de `data/`.
+3. **Upload Filesystem Image**: sube esa imagen al ESP32.
 
 ### Desde la terminal
 ```bash
@@ -165,8 +165,8 @@ batería y la tensión en el pin 33, y calculá `RATIO_DIVISOR = V_bateria / V_p
 
 El desarrollo se hizo por incrementos, cada uno en su rama:
 
-- `sensores` — DS18B20, DHT, LCD y cálculo de HR.
-- `wifi` — Access Point.
-- `web` — servidor web y dashboard.
-- `sockets` — WebSocket, RTC, datalogger, exportación CSV y batería (rama más completa).
-- `main` — integración final.
+- `sensores`: DS18B20, DHT, LCD y cálculo de HR.
+- `wifi`: Access Point.
+- `web`: servidor web y dashboard.
+- `sockets`: WebSocket, RTC, datalogger, exportación CSV y batería (rama más completa).
+- `main`: integración final.
