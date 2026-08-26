@@ -19,7 +19,7 @@ namespace SistemaPsicrometrico {
     DeviceAddress direccionTBH = { 0x28, 0xAC, 0x00, 0x7A, 0x00, 0x00, 0x00, 0x8C }; 
 
     // Configuración del DHT
-    const int dhtPin = 16;
+    const int dhtPin = 32;
     DHT dht;
 
     // Medición de la batería
@@ -27,7 +27,7 @@ namespace SistemaPsicrometrico {
     const int pinBateria = 33;
 
     // Valores de calibración batería
-    const float RATIO_DIVISOR = 4.06;     // provisorio, ajustar en calibración
+    const float RATIO_DIVISOR = 4.6;     // calibrado en pruebas reales
     const float BATERIA_LLENA = 13;     // V con la batería cargada    -> 100 %
     const float BATERIA_VACIA = 8;     // V con la batería descargada -> 0 %
     const int   MUESTRAS_ADC  = 16;       // Promediado para suavizar el ruido del ADC
@@ -106,6 +106,8 @@ namespace SistemaPsicrometrico {
             acumulado += analogReadMilliVolts(pinBateria); // mV calibrados en el pin
         }
         float mvPin = acumulado / (float)MUESTRAS_ADC;
+        // lcd.setCursor(0, 3);
+        // lcd.print(mvPin);
         return (mvPin / 1000.0) * RATIO_DIVISOR;           // V reales de la batería
     }
 
@@ -140,7 +142,7 @@ namespace SistemaPsicrometrico {
         } else {
             lcd.setCursor(0, 1);
             lcd.print("TBS: "); 
-            lcd.print(ultimosDatos.tbs, 2); 
+            lcd.print(ultimosDatos.tbs, 1); 
             lcd.print((char)223); 
             lcd.print("C      ");
         }
@@ -150,7 +152,7 @@ namespace SistemaPsicrometrico {
         } else {
             lcd.setCursor(0, 2);
             lcd.print("TBH: "); 
-            lcd.print(ultimosDatos.tbh, 2);
+            lcd.print(ultimosDatos.tbh, 1);
             lcd.print((char)223); 
             lcd.print("C       ");
         }

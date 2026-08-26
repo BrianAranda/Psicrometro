@@ -5,9 +5,9 @@
 
 // Temporizadores
 unsigned long tAnterior = 0;
-const long intervalo = 5000;      // Como esta en milisegundos esto es 5 segundos
+const long intervalo = 2000;      // Como esta en milisegundos esto es 5 segundos
 unsigned long tAnteriorLog = 0;
-const long intervaloLog = 5000;   // Se deja rápido para ver el funcionamiento
+const long intervaloLog = 2000;   // Se deja rápido para ver el funcionamiento
 
 void setup() {
   Serial.begin(115200);
