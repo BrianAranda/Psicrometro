@@ -39,6 +39,7 @@ function fechaHoraDemo() {
 }
 
 // Registro histórico para la descarga del CSV
+var sincronizado = false; // el datalogger no arranca hasta sincronizar la hora (botón Guardar)
 var MAX_MUESTRAS = 720;
 var historial = [];
 var horaLog = new Date(); // marca de tiempo simulada del datalogger (avanza 2 min por muestra)
@@ -93,7 +94,7 @@ function pasoDemo() {
     demo.bateriaV -= 0.02;                          
     if (demo.bateriaV < 11.8) demo.bateriaV = 12.7; 
 
-    if (demo.progreso < 720) demo.progreso++;
+    if (sincronizado && demo.progreso < 720) demo.progreso++;
 }
 
 // Arma el mismo objeto JSON que enviaría el ESP32 y lo entrega a onMessage().
@@ -107,10 +108,10 @@ function emitirDemo() {
         humDHT: demo.humInt,
         bateriaPct: bateriaPctDemo(demo.bateriaV),
         bateriaV: demo.bateriaV,
-        fechayhora: fechaHoraDemo(),
+        fechayhora: sincronizado ? fechaHoraDemo() : "Esperando ingreso de sincronización",
         progreso: demo.progreso
     };
-    registrarMuestra(obj);
+    if (sincronizado) registrarMuestra(obj);
     onMessage({ data: JSON.stringify(obj) });
 }
 
@@ -121,6 +122,20 @@ window.addEventListener('load', function () {
         btnCsv.addEventListener('click', function (e) {
             e.preventDefault();
             descargarCSV();
+        });
+    }
+
+    // En la demo, el botón "Guardar" (Sincronización RTC) arranca el datalogger
+    var btnGuardar = document.getElementById('guardar_fecha');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', function () {
+            var fecha = document.getElementById('fecha').value;
+            var hora = document.getElementById('hora').value;
+            if (fecha && hora && !sincronizado) {
+                var f = fecha.split('-'), h = hora.split(':');
+                horaLog = new Date(f[0], f[1] - 1, f[2], h[0], h[1], 0); // el registro arranca en la hora ingresada
+                sincronizado = true;
+            }
         });
     }
 

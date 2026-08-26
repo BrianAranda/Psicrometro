@@ -9,6 +9,8 @@ energía e internet).
 Proyecto para promoción de la asignatura **Técnicas Digitales 2 y Sistemas Embebidos**
 Facultad de Ingeniería, U.Na.M. Autores: **Aranda, Brian Ezequiel** y **Klopsztein, Leonel Agustín**.
 
+Se puede en: [panel de control](https://brianaranda.github.io/Psicrometro/data/) un esquemático lanzado con Github Pages.
+
 ---
 
 ## Características
@@ -174,4 +176,4 @@ El desarrollo se hizo por incrementos, cada uno en su rama:
 
 > La rama `demo` funciona sin necesidad del equipo físico. Agrega `data/simulador.js`.
 > Queda accesible en `https://brianaranda.github.io/Psicrometro/data/`.
-> **No cargar la rama `demo` al ESP32.** porque `simulador.js` desactiva la conexión real.
+> **No cargar la rama `demo` al ESP32** porque `simulador.js` desactiva la conexión real.
