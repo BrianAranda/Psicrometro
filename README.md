@@ -170,3 +170,8 @@ El desarrollo se hizo por incrementos, cada uno en su rama:
 - `web`: servidor web y dashboard.
 - `sockets`: WebSocket, RTC, datalogger, exportación CSV y batería (rama más completa).
 - `main`: integración final.
+- `demo`: copia del frontend para publicar el panel de control en **GitHub Pages** con datos simulados
+
+> La rama `demo` funciona sin necesidad del equipo físico. Agrega `data/simulador.js`.
+> Queda accesible en `https://brianaranda.github.io/Psicrometro/data/`.
+> **No cargar la rama `demo` al ESP32.** porque `simulador.js` desactiva la conexión real.
